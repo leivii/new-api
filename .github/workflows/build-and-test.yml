@@ -1,0 +1,58 @@
+name: Build and Test
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'release/*'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set CI version
+        shell: bash
+        run: echo "ci-${GITHUB_SHA::7}" > VERSION
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install frontend dependencies
+        run: |
+          cd web
+          bun install --frozen-lockfile
+
+      - name: Build default frontend
+        run: |
+          cd web/default
+          DISABLE_ESLINT_PLUGIN='true' VITE_REACT_APP_VERSION=$(cat ../../VERSION) bun run build
+
+      - name: Build classic frontend
+        run: |
+          cd web/classic
+          VITE_REACT_APP_VERSION=$(cat ../../VERSION) bun run build
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Download Go modules
+        run: go mod download
+
+      - name: Run Go tests
+        run: go test ./...
+
+      - name: Build backend binary
+        run: |
+          go build -ldflags "-s -w -X 'github.com/QuantumNous/new-api/common.Version=$(cat VERSION)'" -o /tmp/new-api .
