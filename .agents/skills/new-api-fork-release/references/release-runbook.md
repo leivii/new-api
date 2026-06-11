@@ -23,15 +23,19 @@
    - `theme=default` => release `web/default/public/logo.png` and `web/default/public/favicon.ico`
    - `theme=classic` => release `web/classic/public/logo.png` and `web/classic/public/favicon.ico`
    - Update both themes only when you want future theme switches to keep the same branding.
-4. Push fork `main`:
-   - `git -C D:\code\new-api push origin main`
-5. Create release tag:
+4. Preferred unattended release command:
+   - `powershell -NoProfile -ExecutionPolicy Bypass -File "D:\code\new-api-ops\scripts\release-rockapi.ps1" -ImageTag "v1.0.0-rc.10-rockapi.1"`
+5. The release script performs:
+   - authenticated `git push origin main` without GCM UI;
+   - tag creation when missing;
+   - authenticated `git push origin <tag>`;
+   - GHCR manifest polling;
+   - deployment through `deploy-rockapi.ps1`.
+6. Manual fallback if the one-shot script is unavailable:
+   - `git -C D:\code\new-api -c http.extraheader="AUTHORIZATION: basic <base64(user:token)>" push origin main`
    - `git -C D:\code\new-api tag -a v1.0.0-rc.10-rockapi.1 -m "Release v1.0.0-rc.10-rockapi.1"`
-6. Push release tag:
-   - `git -C D:\code\new-api push origin v1.0.0-rc.10-rockapi.1`
-7. Wait for GHCR image:
+   - `git -C D:\code\new-api -c http.extraheader="AUTHORIZATION: basic <base64(user:token)>" push origin v1.0.0-rc.10-rockapi.1`
    - `docker manifest inspect ghcr.io/leivii/new-api:v1.0.0-rc.10-rockapi.1`
-8. Deploy from ops repo:
    - `powershell -NoProfile -ExecutionPolicy Bypass -File "D:\code\new-api-ops\scripts\deploy-rockapi.ps1" -ImageTag "v1.0.0-rc.10-rockapi.1"`
 
 ## Verification
@@ -102,6 +106,18 @@ What to do:
 
 - Record the failing test names in the release notes or operator handoff.
 - If you are doing a functional backend change instead of branding/ops work, treat these failures as real investigation work before release.
+
+### 5. `git push` hangs waiting for login
+
+Cause:
+
+- `git credential-manager get` can block while waiting for an interactive sign-in flow.
+
+Fix:
+
+- Do not wait for GCM.
+- Run the release through `scripts/release-rockapi.ps1`, which reads credentials from `env/prod.env`.
+- Prefer `GITHUB_USERNAME` / `GITHUB_TOKEN`; if they are unset, the script falls back to `GHCR_USERNAME` / `GHCR_TOKEN`.
 
 ## Rollback
 

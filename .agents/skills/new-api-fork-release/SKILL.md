@@ -34,12 +34,17 @@ description: >-
   - `theme=default` => `web/default/public/logo.png` and `web/default/public/favicon.ico`
   - `theme=classic` => `web/classic/public/logo.png` and `web/classic/public/favicon.ico`
   - If you want both themes visually aligned for future switches, update both sets.
-- If `git push origin` returns `403`, inspect GitHub accounts with `git credential-manager github list` and re-authenticate the correct account.
+- Never rely on interactive `git credential-manager` login for this workflow. It can block unattended runs while waiting for UI interaction.
+- Use `D:\code\new-api-ops\env\prod.env` as the non-interactive credential source:
+  - prefer `GITHUB_USERNAME` / `GITHUB_TOKEN` when present;
+  - otherwise fall back to `GHCR_USERNAME` / `GHCR_TOKEN`.
 - Ensure `D:\code\new-api-ops\env\prod.env` exists before production deploys.
 - If `ghcr.io/leivii/new-api` is private, ensure `GHCR_USERNAME` and `GHCR_TOKEN` are populated in `env/prod.env`.
 
 ### 3. Publish a fork release
 
+- Preferred one-shot entrypoint: `D:\code\new-api-ops\scripts\release-rockapi.ps1 -ImageTag <tag>`
+- That script performs non-interactive `push main`, `push tag`, GHCR polling, and deployment using credentials from `env/prod.env`.
 - Push validated source changes from `main`.
 - Create tags as `v<upstream-version>-rockapi.<n>`, for example `v1.0.0-rc.10-rockapi.1`.
 - Keep the current image repository as `ghcr.io/leivii/new-api` until the GitHub owner/repo changes; only the tag suffix changes for branding.
@@ -54,6 +59,7 @@ description: >-
   - `relay/channel/claude.TestRequestOpenAI2ClaudeMessage_SupportsPDFFileContent`
   - `relay/channel/claude.TestRequestOpenAI2ClaudeMessage_ConvertsTextFileContentToText`
 - Treat those as upstream test noise unless you are explicitly fixing them; for fork branding or ops-only releases, let tag image publication plus runtime health decide deploy readiness.
+- When you need GitHub Actions or release diagnostics, use the same token from `env/prod.env` for authenticated GitHub API requests instead of anonymous API calls.
 
 ### 4. Deploy to production
 
