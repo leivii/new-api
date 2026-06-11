@@ -18,15 +18,20 @@
    - `git -C D:\code\new-api status --short --branch`
 2. Check ops repo state:
    - `git -C D:\code\new-api-ops status --short --branch`
-3. Push fork `main`:
+3. For branding-only changes, check the live theme first:
+   - `curl https://rockapi.cn/api/status`
+   - `theme=default` => release `web/default/public/logo.png` and `web/default/public/favicon.ico`
+   - `theme=classic` => release `web/classic/public/logo.png` and `web/classic/public/favicon.ico`
+   - Update both themes only when you want future theme switches to keep the same branding.
+4. Push fork `main`:
    - `git -C D:\code\new-api push origin main`
-4. Create release tag:
+5. Create release tag:
    - `git -C D:\code\new-api tag -a v1.0.0-rc.10-rockapi.1 -m "Release v1.0.0-rc.10-rockapi.1"`
-5. Push release tag:
+6. Push release tag:
    - `git -C D:\code\new-api push origin v1.0.0-rc.10-rockapi.1`
-6. Wait for GHCR image:
+7. Wait for GHCR image:
    - `docker manifest inspect ghcr.io/leivii/new-api:v1.0.0-rc.10-rockapi.1`
-7. Deploy from ops repo:
+8. Deploy from ops repo:
    - `powershell -NoProfile -ExecutionPolicy Bypass -File "D:\code\new-api-ops\scripts\deploy-rockapi.ps1" -ImageTag "v1.0.0-rc.10-rockapi.1"`
 
 ## Verification
@@ -76,6 +81,27 @@ What to do:
 - Do not immediately roll back.
 - Check actual container health and runtime logs first.
 - If `llm-hub-new-api-1` is running the expected image and is `healthy`, treat rollout as successful and then fix the probe separately.
+
+### 4. `Build and Test` fails on `main`, but tag image/release workflows still succeed
+
+Current observed Linux failures reproduced outside GitHub Actions:
+
+- `controller.TestListModelsTokenLimitIncludesTieredBillingModel`
+- `relay/channel/claude.TestRequestOpenAI2ClaudeMessage_IgnoresUnsupportedFileContent`
+- `relay/channel/claude.TestRequestOpenAI2ClaudeMessage_SupportsPDFFileContent`
+- `relay/channel/claude.TestRequestOpenAI2ClaudeMessage_ConvertsTextFileContentToText`
+
+Interpretation:
+
+- These are upstream code/test mismatches, not failures caused by fork branding asset replacements.
+- Do not block a branding-only production release on this workflow alone if:
+  - the tag workflows publish `ghcr.io/leivii/new-api:<tag>`, and
+  - the deployed container comes up healthy on `rockapi`.
+
+What to do:
+
+- Record the failing test names in the release notes or operator handoff.
+- If you are doing a functional backend change instead of branding/ops work, treat these failures as real investigation work before release.
 
 ## Rollback
 

@@ -30,6 +30,10 @@ description: >-
 - Confirm both sibling repos exist and are on the expected branch.
 - Run `git status --short --branch` in both repos before editing or tagging.
 - Do not revert unrelated user changes. Temporary local files may exist; inspect before deleting.
+- For branding-only releases, check the active frontend theme from `/api/status` before deciding which static assets to update:
+  - `theme=default` => `web/default/public/logo.png` and `web/default/public/favicon.ico`
+  - `theme=classic` => `web/classic/public/logo.png` and `web/classic/public/favicon.ico`
+  - If you want both themes visually aligned for future switches, update both sets.
 - If `git push origin` returns `403`, inspect GitHub accounts with `git credential-manager github list` and re-authenticate the correct account.
 - Ensure `D:\code\new-api-ops\env\prod.env` exists before production deploys.
 - If `ghcr.io/leivii/new-api` is private, ensure `GHCR_USERNAME` and `GHCR_TOKEN` are populated in `env/prod.env`.
@@ -44,6 +48,12 @@ description: >-
   - `ghcr.io/leivii/new-api:<tag>`
 - Prefer checking GHCR readiness with `docker manifest inspect ghcr.io/leivii/new-api:<tag>`.
 - If the manifest is missing, read [references/release-runbook.md](references/release-runbook.md) for the two common causes.
+- The `Build and Test` workflow on `main` is currently not a clean release gate. Recent Linux failures reproduced outside GitHub Actions include:
+  - `controller.TestListModelsTokenLimitIncludesTieredBillingModel`
+  - `relay/channel/claude.TestRequestOpenAI2ClaudeMessage_IgnoresUnsupportedFileContent`
+  - `relay/channel/claude.TestRequestOpenAI2ClaudeMessage_SupportsPDFFileContent`
+  - `relay/channel/claude.TestRequestOpenAI2ClaudeMessage_ConvertsTextFileContentToText`
+- Treat those as upstream test noise unless you are explicitly fixing them; for fork branding or ops-only releases, let tag image publication plus runtime health decide deploy readiness.
 
 ### 4. Deploy to production
 
