@@ -39,7 +39,7 @@ description: >-
   - prefer `GITHUB_USERNAME` / `GITHUB_TOKEN` when present;
   - otherwise fall back to `GHCR_USERNAME` / `GHCR_TOKEN`.
 - Ensure `D:\code\new-api-ops\env\prod.env` exists before production deploys.
-- If `ghcr.io/leivii/new-api` is private, ensure `GHCR_USERNAME` and `GHCR_TOKEN` are populated in `env/prod.env`.
+- If `ghcr.io/x-llm-net/new-api` is private, ensure `GHCR_USERNAME` and `GHCR_TOKEN` are populated in `env/prod.env`.
 
 ### 3. Publish a fork release
 
@@ -47,11 +47,11 @@ description: >-
 - That script performs non-interactive `push main`, `push tag`, GHCR polling, and deployment using credentials from `env/prod.env`.
 - Push validated source changes from `main`.
 - Create tags as `v<upstream-version>-rockapi.<n>`, for example `v1.0.0-rc.10-rockapi.1`.
-- Keep the current image repository as `ghcr.io/leivii/new-api` until the GitHub owner/repo changes; only the tag suffix changes for branding.
+- Use `ghcr.io/x-llm-net/new-api` as the fork image repository; only the tag suffix changes for branding.
 - Push the tag and wait for GitHub Actions to publish:
   - GitHub Release artifacts
-  - `ghcr.io/leivii/new-api:<tag>`
-- Prefer checking GHCR readiness with `docker manifest inspect ghcr.io/leivii/new-api:<tag>`.
+  - `ghcr.io/x-llm-net/new-api:<tag>`
+- Prefer checking GHCR readiness with `docker manifest inspect ghcr.io/x-llm-net/new-api:<tag>`.
 - If the manifest is missing, read [references/release-runbook.md](references/release-runbook.md) for the two common causes.
 - The `Build and Test` workflow on `main` is currently not a clean release gate. Recent Linux failures reproduced outside GitHub Actions include:
   - `controller.TestListModelsTokenLimitIncludesTieredBillingModel`

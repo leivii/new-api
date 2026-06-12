@@ -4,11 +4,11 @@
 
 - Source fork repo: `D:\code\new-api`
 - Deploy/runtime repo: `D:\code\new-api-ops`
-- Fork remote: `origin = https://github.com/leivii/new-api.git`
+- Fork remote: `origin = https://github.com/x-llm-net/new-api.git`
 - Official remote: `upstream = https://github.com/QuantumNous/new-api.git`
 - Production host alias: `rockapi`
 - Production runtime dir: `/opt/llm-hub`
-- Production image repo: `ghcr.io/leivii/new-api`
+- Production image repo: `ghcr.io/x-llm-net/new-api`
 - Release tag suffix: `rockapi` (for example `v1.0.0-rc.10-rockapi.1`)
 - Production deploy entrypoint: `D:\code\new-api-ops\scripts\deploy-rockapi.ps1`
 
@@ -35,7 +35,7 @@
    - `git -C D:\code\new-api -c http.extraheader="AUTHORIZATION: basic <base64(user:token)>" push origin main`
    - `git -C D:\code\new-api tag -a v1.0.0-rc.10-rockapi.1 -m "Release v1.0.0-rc.10-rockapi.1"`
    - `git -C D:\code\new-api -c http.extraheader="AUTHORIZATION: basic <base64(user:token)>" push origin v1.0.0-rc.10-rockapi.1`
-   - `docker manifest inspect ghcr.io/leivii/new-api:v1.0.0-rc.10-rockapi.1`
+   - `docker manifest inspect ghcr.io/x-llm-net/new-api:v1.0.0-rc.10-rockapi.1`
    - `powershell -NoProfile -ExecutionPolicy Bypass -File "D:\code\new-api-ops\scripts\deploy-rockapi.ps1" -ImageTag "v1.0.0-rc.10-rockapi.1"`
 
 ## Verification
@@ -60,7 +60,7 @@ Fix:
 - Re-login the correct account:
   - `git credential-manager github login --device --force`
 
-### 2. `docker manifest inspect ghcr.io/leivii/new-api:<tag>` says `manifest unknown`
+### 2. `docker manifest inspect ghcr.io/x-llm-net/new-api:<tag>` says `manifest unknown`
 
 Possible causes:
 
@@ -99,7 +99,7 @@ Interpretation:
 
 - These are upstream code/test mismatches, not failures caused by fork branding asset replacements.
 - Do not block a branding-only production release on this workflow alone if:
-  - the tag workflows publish `ghcr.io/leivii/new-api:<tag>`, and
+  - the tag workflows publish `ghcr.io/x-llm-net/new-api:<tag>`, and
   - the deployed container comes up healthy on `rockapi`.
 
 What to do:
